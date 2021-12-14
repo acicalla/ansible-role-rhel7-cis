@@ -24926,6 +24926,18 @@
   - restrict_strategy
   - sshd_use_approved_ciphers
 
+- name: "SCORED | 5.2.12 | PATCH | Ensure only approved Kex algorithms are used"
+  lineinfile:
+      state: present
+      dest: /etc/ssh/sshd_config
+      regexp: '^KexAlgorithms'
+      line: 'KexAlgorithms ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,diffie-hellman-group14-sha256'
+  tags:
+      - level1
+      - level2
+      - patch
+      - rule_5.2.12
+
 - name: Use Only FIPS 140-2 Validated MACs
   block:
   - name: Check for duplicate values
