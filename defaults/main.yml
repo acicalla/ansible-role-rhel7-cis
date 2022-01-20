@@ -267,7 +267,7 @@ service_autofs_disabled: false
 service_crond_enabled: true
 service_firewalld_enabled: true
 service_ntpd_enabled: true
-service_rpcbind_disabled: true
+service_rpcbind_disabled: false
 service_rsyncd_disabled: true
 service_rsyslog_enabled: true
 sshd_disable_empty_passwords: true
