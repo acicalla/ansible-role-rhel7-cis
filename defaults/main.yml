@@ -263,7 +263,7 @@ rsyslog_remote_loghost: true
 selinux_policytype: true
 selinux_state: true
 service_auditd_enabled: true
-service_autofs_disabled: true
+service_autofs_disabled: false
 service_crond_enabled: true
 service_firewalld_enabled: true
 service_ntpd_enabled: true
