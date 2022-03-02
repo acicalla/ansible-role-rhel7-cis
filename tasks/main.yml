@@ -25040,3 +25040,2094 @@
   - reboot_required | bool
   - restrict_strategy | bool
   - xwindows_remove_packages | bool
+    - name: Modify the System Login Banner - ensure correct banner
+      copy:
+        dest: /etc/issue
+        content: '{{ login_banner_text | regex_replace("^\^(.*)\$$", "\1") | regex_replace("^\((.*\.)\|.*\)$",
+          "\1") | regex_replace("\[\\s\\n\]\+"," ") | regex_replace("\(\?:\[\\n\]\+\|\(\?:\\\\n\)\+\)",
+          "\n") | regex_replace("\\", "") | wordwrap() }}'
+      when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+      tags:
+        - CCE-27303-7
+        - DISA-STIG-RHEL-07-010050
+        - NIST-800-171-3.1.9
+        - NIST-800-53-AC-8(a)
+        - NIST-800-53-AC-8(c)
+        - banner_etc_issue
+        - low_complexity
+        - medium_disruption
+        - medium_severity
+        - no_reboot_needed
+        - unknown_strategy
+    
+    
+    
+    - name: Modify the System Message of the Day Banner - ensure correct banner
+      copy:
+        dest: /etc/motd
+        content: '{{ login_banner_text | regex_replace("^\^(.*)\$$", "\1") | regex_replace("^\((.*\.)\|.*\)$",
+          "\1") | regex_replace("\[\\s\\n\]\+"," ") | regex_replace("\(\?:\[\\n\]\+\|\(\?:\\\\n\)\+\)",
+          "\n") | regex_replace("\\", "") | wordwrap() }}'
+      when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+      tags:
+        - CCE-83394-7
+        - banner_etc_motd
+        - low_complexity
+        - medium_disruption
+        - medium_severity
+        - no_reboot_needed
+        - unknown_strategy
+    
+    - name: Gather the package facts
+      package_facts:
+        manager: auto
+      tags:
+        - CCE-27212-0
+        - CJIS-5.4.1.1
+        - NIST-800-171-3.3.1
+        - NIST-800-53-AC-17(1)
+        - NIST-800-53-AU-10
+        - NIST-800-53-AU-14(1)
+        - NIST-800-53-CM-6(a)
+        - NIST-800-53-IR-5(1)
+        - PCI-DSS-Req-10.3
+        - grub2_audit_argument
+        - low_disruption
+        - medium_complexity
+        - medium_severity
+        - reboot_required
+        - restrict_strategy
+    
+    - name: check audit argument exists
+      command: grep 'GRUB_CMDLINE_LINUX.*audit=' /etc/default/grub
+      failed_when: false
+      register: argcheck
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - '"grub2-common" in ansible_facts.packages'
+      tags:
+        - CCE-27212-0
+        - CJIS-5.4.1.1
+        - NIST-800-171-3.3.1
+        - NIST-800-53-AC-17(1)
+        - NIST-800-53-AU-10
+        - NIST-800-53-AU-14(1)
+        - NIST-800-53-CM-6(a)
+        - NIST-800-53-IR-5(1)
+        - PCI-DSS-Req-10.3
+        - grub2_audit_argument
+        - low_disruption
+        - medium_complexity
+        - medium_severity
+        - reboot_required
+        - restrict_strategy
+    
+    - name: replace existing audit argument
+      replace:
+        path: /etc/default/grub
+        regexp: audit=\w+
+        replace: audit=1
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - '"grub2-common" in ansible_facts.packages'
+        - argcheck.rc == 0
+      tags:
+        - CCE-27212-0
+        - CJIS-5.4.1.1
+        - NIST-800-171-3.3.1
+        - NIST-800-53-AC-17(1)
+        - NIST-800-53-AU-10
+        - NIST-800-53-AU-14(1)
+        - NIST-800-53-CM-6(a)
+        - NIST-800-53-IR-5(1)
+        - PCI-DSS-Req-10.3
+        - grub2_audit_argument
+        - low_disruption
+        - medium_complexity
+        - medium_severity
+        - reboot_required
+        - restrict_strategy
+    
+    - name: add audit argument
+      replace:
+        path: /etc/default/grub
+        regexp: (GRUB_CMDLINE_LINUX=.*)"
+        replace: \1 audit=1"
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - '"grub2-common" in ansible_facts.packages'
+        - argcheck.rc != 0
+      tags:
+        - CCE-27212-0
+        - CJIS-5.4.1.1
+        - NIST-800-171-3.3.1
+        - NIST-800-53-AC-17(1)
+        - NIST-800-53-AU-10
+        - NIST-800-53-AU-14(1)
+        - NIST-800-53-CM-6(a)
+        - NIST-800-53-IR-5(1)
+        - PCI-DSS-Req-10.3
+        - grub2_audit_argument
+        - low_disruption
+        - medium_complexity
+        - medium_severity
+        - reboot_required
+        - restrict_strategy
+    
+    - name: update bootloader menu
+      command: /sbin/grubby --update-kernel=ALL --args="audit=1"
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - '"grub2-common" in ansible_facts.packages'
+      tags:
+        - CCE-27212-0
+        - CJIS-5.4.1.1
+        - NIST-800-171-3.3.1
+        - NIST-800-53-AC-17(1)
+        - NIST-800-53-AU-10
+        - NIST-800-53-AU-14(1)
+        - NIST-800-53-CM-6(a)
+        - NIST-800-53-IR-5(1)
+        - PCI-DSS-Req-10.3
+        - grub2_audit_argument
+        - low_disruption
+        - medium_complexity
+        - medium_severity
+        - reboot_required
+        - restrict_strategy
+    
+    - name: Gather the package facts
+      package_facts:
+        manager: auto
+      tags:
+        - CCE-82156-1
+        - NIST-800-53-CM-6(a)
+        - grub2_audit_backlog_limit_argument
+        - low_disruption
+        - medium_complexity
+        - medium_severity
+        - reboot_required
+        - restrict_strategy
+    
+    - name: check audit_backlog_limit argument exists
+      command: grep 'GRUB_CMDLINE_LINUX.*audit_backlog_limit=' /etc/default/grub
+      failed_when: false
+      register: argcheck
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - '"grub2-common" in ansible_facts.packages'
+      tags:
+        - CCE-82156-1
+        - NIST-800-53-CM-6(a)
+        - grub2_audit_backlog_limit_argument
+        - low_disruption
+        - medium_complexity
+        - medium_severity
+        - reboot_required
+        - restrict_strategy
+    
+    - name: replace existing audit_backlog_limit argument
+      replace:
+        path: /etc/default/grub
+        regexp: audit_backlog_limit=\w+
+        replace: audit_backlog_limit=8192
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - '"grub2-common" in ansible_facts.packages'
+        - argcheck.rc == 0
+      tags:
+        - CCE-82156-1
+        - NIST-800-53-CM-6(a)
+        - grub2_audit_backlog_limit_argument
+        - low_disruption
+        - medium_complexity
+        - medium_severity
+        - reboot_required
+        - restrict_strategy
+    
+    - name: add audit_backlog_limit argument
+      replace:
+        path: /etc/default/grub
+        regexp: (GRUB_CMDLINE_LINUX=.*)"
+        replace: \1 audit_backlog_limit=8192"
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - '"grub2-common" in ansible_facts.packages'
+        - argcheck.rc != 0
+      tags:
+        - CCE-82156-1
+        - NIST-800-53-CM-6(a)
+        - grub2_audit_backlog_limit_argument
+        - low_disruption
+        - medium_complexity
+        - medium_severity
+        - reboot_required
+        - restrict_strategy
+    
+    - name: update bootloader menu
+      command: /sbin/grubby --update-kernel=ALL --args="audit_backlog_limit=8192"
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - '"grub2-common" in ansible_facts.packages'
+      tags:
+        - CCE-82156-1
+        - NIST-800-53-CM-6(a)
+        - grub2_audit_backlog_limit_argument
+        - low_disruption
+        - medium_complexity
+        - medium_severity
+        - reboot_required
+        - restrict_strategy
+    
+    - name: Gather the package facts
+      package_facts:
+        manager: auto
+      tags:
+        - CCE-27097-5
+        - CJIS-5.4.1.1
+        - NIST-800-171-3.3.1
+        - NIST-800-171-3.4.3
+        - NIST-800-53-AC-6(9)
+        - NIST-800-53-CM-6(a)
+        - PCI-DSS-Req-10.5.2
+        - audit_rules_immutable
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - reboot_required
+        - restrict_strategy
+    
+    - name: Collect all files from /etc/audit/rules.d with .rules extension
+      find:
+        paths: /etc/audit/rules.d/
+        patterns: '*.rules'
+      register: find_rules_d
+      when: '"audit" in ansible_facts.packages'
+      tags:
+        - CCE-27097-5
+        - CJIS-5.4.1.1
+        - NIST-800-171-3.3.1
+        - NIST-800-171-3.4.3
+        - NIST-800-53-AC-6(9)
+        - NIST-800-53-CM-6(a)
+        - PCI-DSS-Req-10.5.2
+        - audit_rules_immutable
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - reboot_required
+        - restrict_strategy
+    
+    - name: Remove the -e option from all Audit config files
+      lineinfile:
+        path: '{{ item }}'
+        regexp: ^\s*(?:-e)\s+.*$
+        state: absent
+      loop: '{{ find_rules_d.files | map(attribute=''path'') | list + [''/etc/audit/audit.rules'']
+        }}'
+      when: '"audit" in ansible_facts.packages'
+      tags:
+        - CCE-27097-5
+        - CJIS-5.4.1.1
+        - NIST-800-171-3.3.1
+        - NIST-800-171-3.4.3
+        - NIST-800-53-AC-6(9)
+        - NIST-800-53-CM-6(a)
+        - PCI-DSS-Req-10.5.2
+        - audit_rules_immutable
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - reboot_required
+        - restrict_strategy
+    
+    - name: Add Audit -e option into /etc/audit/rules.d/immutable.rules and /etc/audit/audit.rules
+      lineinfile:
+        path: '{{ item }}'
+        create: true
+        line: -e 2
+        mode: o-rwx
+      loop:
+        - /etc/audit/audit.rules
+        - /etc/audit/rules.d/immutable.rules
+      when: '"audit" in ansible_facts.packages'
+      tags:
+        - CCE-27097-5
+        - CJIS-5.4.1.1
+        - NIST-800-171-3.3.1
+        - NIST-800-171-3.4.3
+        - NIST-800-53-AC-6(9)
+        - NIST-800-53-CM-6(a)
+        - PCI-DSS-Req-10.5.2
+        - audit_rules_immutable
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - reboot_required
+        - restrict_strategy
+    
+    - name: Test for existence /boot/efi/EFI/redhat/grub.cfg
+      stat:
+        path: /boot/efi/EFI/redhat/grub.cfg
+      register: file_exists
+      when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+      tags:
+        - CCE-83430-9
+        - CJIS-5.5.2.2
+        - NIST-800-171-3.4.5
+        - NIST-800-53-AC-6(1)
+        - NIST-800-53-CM-6(a)
+        - PCI-DSS-Req-7.1
+        - configure_strategy
+        - file_groupowner_efi_grub2_cfg
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+    
+    - name: Ensure group owner 0 on /boot/efi/EFI/redhat/grub.cfg
+      file:
+        path: /boot/efi/EFI/redhat/grub.cfg
+        group: '0'
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - file_exists.stat is defined and file_exists.stat.exists
+      tags:
+        - CCE-83430-9
+        - CJIS-5.5.2.2
+        - NIST-800-171-3.4.5
+        - NIST-800-53-AC-6(1)
+        - NIST-800-53-CM-6(a)
+        - PCI-DSS-Req-7.1
+        - configure_strategy
+        - file_groupowner_efi_grub2_cfg
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+    
+    - name: Test for existence /boot/efi/EFI/redhat/grub.cfg
+      stat:
+        path: /boot/efi/EFI/redhat/grub.cfg
+      register: file_exists
+      when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+      tags:
+        - CCE-83429-1
+        - CJIS-5.5.2.2
+        - NIST-800-171-3.4.5
+        - NIST-800-53-AC-6(1)
+        - NIST-800-53-CM-6(a)
+        - PCI-DSS-Req-7.1
+        - configure_strategy
+        - file_owner_efi_grub2_cfg
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+    
+    - name: Ensure owner 0 on /boot/efi/EFI/redhat/grub.cfg
+      file:
+        path: /boot/efi/EFI/redhat/grub.cfg
+        owner: '0'
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - file_exists.stat is defined and file_exists.stat.exists
+      tags:
+        - CCE-83429-1
+        - CJIS-5.5.2.2
+        - NIST-800-171-3.4.5
+        - NIST-800-53-AC-6(1)
+        - NIST-800-53-CM-6(a)
+        - PCI-DSS-Req-7.1
+        - configure_strategy
+        - file_owner_efi_grub2_cfg
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+    
+    - name: Check information associated to mountpoint
+      command: findmnt --fstab '/home'
+      register: device_name
+      failed_when: device_name.rc > 1
+      changed_when: false
+      when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+      tags:
+        - CCE-81047-3
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - mount_option_home_nodev
+        - no_reboot_needed
+        - unknown_severity
+    
+    - name: Create mount_info dictionary variable
+      set_fact:
+        mount_info: '{{ mount_info|default({})|combine({item.0: item.1}) }}'
+      with_together:
+        - '{{ device_name.stdout_lines[0].split() | list | lower }}'
+        - '{{ device_name.stdout_lines[1].split() | list }}'
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - device_name.stdout is defined and device_name.stdout_lines is defined
+        - (device_name.stdout | length > 0)
+      tags:
+        - CCE-81047-3
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - mount_option_home_nodev
+        - no_reboot_needed
+        - unknown_severity
+    
+    - name: If /home not mounted, craft mount_info manually
+      set_fact:
+        mount_info: '{{ mount_info|default({})|combine({item.0: item.1}) }}'
+      with_together:
+        - - target
+          - source
+          - fstype
+          - options
+        - - /home
+          - ''
+          - ''
+          - defaults
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - ("--fstab" | length == 0)
+        - (device_name.stdout | length == 0)
+      tags:
+        - CCE-81047-3
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - mount_option_home_nodev
+        - no_reboot_needed
+        - unknown_severity
+    
+    - name: Make sure nodev option is part of the to /home options
+      set_fact:
+        mount_info: '{{ mount_info | combine( {''options'':''''~mount_info.options~'',nodev''
+          }) }}'
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - mount_info is defined and "nodev" not in mount_info.options
+      tags:
+        - CCE-81047-3
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - mount_option_home_nodev
+        - no_reboot_needed
+        - unknown_severity
+    
+    - name: Ensure /home is mounted with nodev option
+      mount:
+        path: /home
+        src: '{{ mount_info.source }}'
+        opts: '{{ mount_info.options }}'
+        state: mounted
+        fstype: '{{ mount_info.fstype }}'
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - (device_name.stdout is defined and (device_name.stdout | length > 0)) or ("--fstab"
+          | length == 0)
+      tags:
+        - CCE-81047-3
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - mount_option_home_nodev
+        - no_reboot_needed
+        - unknown_severity
+    
+    - name: Check information associated to mountpoint
+      command: findmnt --fstab '/tmp'
+      register: device_name
+      failed_when: device_name.rc > 1
+      changed_when: false
+      when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+      tags:
+        - CCE-80149-8
+        - NIST-800-53-AC-6
+        - NIST-800-53-AC-6(1)
+        - NIST-800-53-CM-6(a)
+        - NIST-800-53-CM-7(a)
+        - NIST-800-53-CM-7(b)
+        - NIST-800-53-MP-7
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - medium_severity
+        - mount_option_tmp_nodev
+        - no_reboot_needed
+    
+    - name: Create mount_info dictionary variable
+      set_fact:
+        mount_info: '{{ mount_info|default({})|combine({item.0: item.1}) }}'
+      with_together:
+        - '{{ device_name.stdout_lines[0].split() | list | lower }}'
+        - '{{ device_name.stdout_lines[1].split() | list }}'
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - device_name.stdout is defined and device_name.stdout_lines is defined
+        - (device_name.stdout | length > 0)
+      tags:
+        - CCE-80149-8
+        - NIST-800-53-AC-6
+        - NIST-800-53-AC-6(1)
+        - NIST-800-53-CM-6(a)
+        - NIST-800-53-CM-7(a)
+        - NIST-800-53-CM-7(b)
+        - NIST-800-53-MP-7
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - medium_severity
+        - mount_option_tmp_nodev
+        - no_reboot_needed
+    
+    - name: If /tmp not mounted, craft mount_info manually
+      set_fact:
+        mount_info: '{{ mount_info|default({})|combine({item.0: item.1}) }}'
+      with_together:
+        - - target
+          - source
+          - fstype
+          - options
+        - - /tmp
+          - ''
+          - ''
+          - defaults
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - ("--fstab" | length == 0)
+        - (device_name.stdout | length == 0)
+      tags:
+        - CCE-80149-8
+        - NIST-800-53-AC-6
+        - NIST-800-53-AC-6(1)
+        - NIST-800-53-CM-6(a)
+        - NIST-800-53-CM-7(a)
+        - NIST-800-53-CM-7(b)
+        - NIST-800-53-MP-7
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - medium_severity
+        - mount_option_tmp_nodev
+        - no_reboot_needed
+    
+    - name: Make sure nodev option is part of the to /tmp options
+      set_fact:
+        mount_info: '{{ mount_info | combine( {''options'':''''~mount_info.options~'',nodev''
+          }) }}'
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - mount_info is defined and "nodev" not in mount_info.options
+      tags:
+        - CCE-80149-8
+        - NIST-800-53-AC-6
+        - NIST-800-53-AC-6(1)
+        - NIST-800-53-CM-6(a)
+        - NIST-800-53-CM-7(a)
+        - NIST-800-53-CM-7(b)
+        - NIST-800-53-MP-7
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - medium_severity
+        - mount_option_tmp_nodev
+        - no_reboot_needed
+    
+    - name: Ensure /tmp is mounted with nodev option
+      mount:
+        path: /tmp
+        src: '{{ mount_info.source }}'
+        opts: '{{ mount_info.options }}'
+        state: mounted
+        fstype: '{{ mount_info.fstype }}'
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - (device_name.stdout is defined and (device_name.stdout | length > 0)) or ("--fstab"
+          | length == 0)
+      tags:
+        - CCE-80149-8
+        - NIST-800-53-AC-6
+        - NIST-800-53-AC-6(1)
+        - NIST-800-53-CM-6(a)
+        - NIST-800-53-CM-7(a)
+        - NIST-800-53-CM-7(b)
+        - NIST-800-53-MP-7
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - medium_severity
+        - mount_option_tmp_nodev
+        - no_reboot_needed
+    
+    - name: Check information associated to mountpoint
+      command: findmnt --fstab '/tmp'
+      register: device_name
+      failed_when: device_name.rc > 1
+      changed_when: false
+      when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+      tags:
+        - CCE-80150-6
+        - NIST-800-53-AC-6
+        - NIST-800-53-AC-6(1)
+        - NIST-800-53-CM-6(a)
+        - NIST-800-53-CM-7(a)
+        - NIST-800-53-CM-7(b)
+        - NIST-800-53-MP-7
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - medium_severity
+        - mount_option_tmp_noexec
+        - no_reboot_needed
+    
+    - name: Create mount_info dictionary variable
+      set_fact:
+        mount_info: '{{ mount_info|default({})|combine({item.0: item.1}) }}'
+      with_together:
+        - '{{ device_name.stdout_lines[0].split() | list | lower }}'
+        - '{{ device_name.stdout_lines[1].split() | list }}'
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - device_name.stdout is defined and device_name.stdout_lines is defined
+        - (device_name.stdout | length > 0)
+      tags:
+        - CCE-80150-6
+        - NIST-800-53-AC-6
+        - NIST-800-53-AC-6(1)
+        - NIST-800-53-CM-6(a)
+        - NIST-800-53-CM-7(a)
+        - NIST-800-53-CM-7(b)
+        - NIST-800-53-MP-7
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - medium_severity
+        - mount_option_tmp_noexec
+        - no_reboot_needed
+    
+    - name: If /tmp not mounted, craft mount_info manually
+      set_fact:
+        mount_info: '{{ mount_info|default({})|combine({item.0: item.1}) }}'
+      with_together:
+        - - target
+          - source
+          - fstype
+          - options
+        - - /tmp
+          - ''
+          - ''
+          - defaults
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - ("--fstab" | length == 0)
+        - (device_name.stdout | length == 0)
+      tags:
+        - CCE-80150-6
+        - NIST-800-53-AC-6
+        - NIST-800-53-AC-6(1)
+        - NIST-800-53-CM-6(a)
+        - NIST-800-53-CM-7(a)
+        - NIST-800-53-CM-7(b)
+        - NIST-800-53-MP-7
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - medium_severity
+        - mount_option_tmp_noexec
+        - no_reboot_needed
+    
+    - name: Make sure noexec option is part of the to /tmp options
+      set_fact:
+        mount_info: '{{ mount_info | combine( {''options'':''''~mount_info.options~'',noexec''
+          }) }}'
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - mount_info is defined and "noexec" not in mount_info.options
+      tags:
+        - CCE-80150-6
+        - NIST-800-53-AC-6
+        - NIST-800-53-AC-6(1)
+        - NIST-800-53-CM-6(a)
+        - NIST-800-53-CM-7(a)
+        - NIST-800-53-CM-7(b)
+        - NIST-800-53-MP-7
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - medium_severity
+        - mount_option_tmp_noexec
+        - no_reboot_needed
+    
+    - name: Ensure /tmp is mounted with noexec option
+      mount:
+        path: /tmp
+        src: '{{ mount_info.source }}'
+        opts: '{{ mount_info.options }}'
+        state: mounted
+        fstype: '{{ mount_info.fstype }}'
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - (device_name.stdout is defined and (device_name.stdout | length > 0)) or ("--fstab"
+          | length == 0)
+      tags:
+        - CCE-80150-6
+        - NIST-800-53-AC-6
+        - NIST-800-53-AC-6(1)
+        - NIST-800-53-CM-6(a)
+        - NIST-800-53-CM-7(a)
+        - NIST-800-53-CM-7(b)
+        - NIST-800-53-MP-7
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - medium_severity
+        - mount_option_tmp_noexec
+        - no_reboot_needed
+    
+    - name: Check information associated to mountpoint
+      command: findmnt --fstab '/tmp'
+      register: device_name
+      failed_when: device_name.rc > 1
+      changed_when: false
+      when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+      tags:
+        - CCE-80151-4
+        - NIST-800-53-AC-6
+        - NIST-800-53-AC-6(1)
+        - NIST-800-53-CM-6(a)
+        - NIST-800-53-CM-7(a)
+        - NIST-800-53-CM-7(b)
+        - NIST-800-53-MP-7
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - medium_severity
+        - mount_option_tmp_nosuid
+        - no_reboot_needed
+    
+    - name: Create mount_info dictionary variable
+      set_fact:
+        mount_info: '{{ mount_info|default({})|combine({item.0: item.1}) }}'
+      with_together:
+        - '{{ device_name.stdout_lines[0].split() | list | lower }}'
+        - '{{ device_name.stdout_lines[1].split() | list }}'
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - device_name.stdout is defined and device_name.stdout_lines is defined
+        - (device_name.stdout | length > 0)
+      tags:
+        - CCE-80151-4
+        - NIST-800-53-AC-6
+        - NIST-800-53-AC-6(1)
+        - NIST-800-53-CM-6(a)
+        - NIST-800-53-CM-7(a)
+        - NIST-800-53-CM-7(b)
+        - NIST-800-53-MP-7
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - medium_severity
+        - mount_option_tmp_nosuid
+        - no_reboot_needed
+    
+    - name: If /tmp not mounted, craft mount_info manually
+      set_fact:
+        mount_info: '{{ mount_info|default({})|combine({item.0: item.1}) }}'
+      with_together:
+        - - target
+          - source
+          - fstype
+          - options
+        - - /tmp
+          - ''
+          - ''
+          - defaults
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - ("--fstab" | length == 0)
+        - (device_name.stdout | length == 0)
+      tags:
+        - CCE-80151-4
+        - NIST-800-53-AC-6
+        - NIST-800-53-AC-6(1)
+        - NIST-800-53-CM-6(a)
+        - NIST-800-53-CM-7(a)
+        - NIST-800-53-CM-7(b)
+        - NIST-800-53-MP-7
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - medium_severity
+        - mount_option_tmp_nosuid
+        - no_reboot_needed
+    
+    - name: Make sure nosuid option is part of the to /tmp options
+      set_fact:
+        mount_info: '{{ mount_info | combine( {''options'':''''~mount_info.options~'',nosuid''
+          }) }}'
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - mount_info is defined and "nosuid" not in mount_info.options
+      tags:
+        - CCE-80151-4
+        - NIST-800-53-AC-6
+        - NIST-800-53-AC-6(1)
+        - NIST-800-53-CM-6(a)
+        - NIST-800-53-CM-7(a)
+        - NIST-800-53-CM-7(b)
+        - NIST-800-53-MP-7
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - medium_severity
+        - mount_option_tmp_nosuid
+        - no_reboot_needed
+    
+    - name: Ensure /tmp is mounted with nosuid option
+      mount:
+        path: /tmp
+        src: '{{ mount_info.source }}'
+        opts: '{{ mount_info.options }}'
+        state: mounted
+        fstype: '{{ mount_info.fstype }}'
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - (device_name.stdout is defined and (device_name.stdout | length > 0)) or ("--fstab"
+          | length == 0)
+      tags:
+        - CCE-80151-4
+        - NIST-800-53-AC-6
+        - NIST-800-53-AC-6(1)
+        - NIST-800-53-CM-6(a)
+        - NIST-800-53-CM-7(a)
+        - NIST-800-53-CM-7(b)
+        - NIST-800-53-MP-7
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - medium_severity
+        - mount_option_tmp_nosuid
+        - no_reboot_needed
+    
+    - name: Check information associated to mountpoint
+      command: findmnt --fstab '/var/tmp'
+      register: device_name
+      failed_when: device_name.rc > 1
+      changed_when: false
+      when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+      tags:
+        - CCE-81052-3
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - medium_severity
+        - mount_option_var_tmp_nodev
+        - no_reboot_needed
+    
+    - name: Create mount_info dictionary variable
+      set_fact:
+        mount_info: '{{ mount_info|default({})|combine({item.0: item.1}) }}'
+      with_together:
+        - '{{ device_name.stdout_lines[0].split() | list | lower }}'
+        - '{{ device_name.stdout_lines[1].split() | list }}'
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - device_name.stdout is defined and device_name.stdout_lines is defined
+        - (device_name.stdout | length > 0)
+      tags:
+        - CCE-81052-3
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - medium_severity
+        - mount_option_var_tmp_nodev
+        - no_reboot_needed
+    
+    - name: If /var/tmp not mounted, craft mount_info manually
+      set_fact:
+        mount_info: '{{ mount_info|default({})|combine({item.0: item.1}) }}'
+      with_together:
+        - - target
+          - source
+          - fstype
+          - options
+        - - /var/tmp
+          - ''
+          - ''
+          - defaults
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - ("--fstab" | length == 0)
+        - (device_name.stdout | length == 0)
+      tags:
+        - CCE-81052-3
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - medium_severity
+        - mount_option_var_tmp_nodev
+        - no_reboot_needed
+    
+    - name: Make sure nodev option is part of the to /var/tmp options
+      set_fact:
+        mount_info: '{{ mount_info | combine( {''options'':''''~mount_info.options~'',nodev''
+          }) }}'
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - mount_info is defined and "nodev" not in mount_info.options
+      tags:
+        - CCE-81052-3
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - medium_severity
+        - mount_option_var_tmp_nodev
+        - no_reboot_needed
+    
+    - name: Ensure /var/tmp is mounted with nodev option
+      mount:
+        path: /var/tmp
+        src: '{{ mount_info.source }}'
+        opts: '{{ mount_info.options }}'
+        state: mounted
+        fstype: '{{ mount_info.fstype }}'
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - (device_name.stdout is defined and (device_name.stdout | length > 0)) or ("--fstab"
+          | length == 0)
+      tags:
+        - CCE-81052-3
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - medium_severity
+        - mount_option_var_tmp_nodev
+        - no_reboot_needed
+    
+    - name: Check information associated to mountpoint
+      command: findmnt --fstab '/var/tmp'
+      register: device_name
+      failed_when: device_name.rc > 1
+      changed_when: false
+      when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+      tags:
+        - CCE-82150-4
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - medium_severity
+        - mount_option_var_tmp_noexec
+        - no_reboot_needed
+    
+    - name: Create mount_info dictionary variable
+      set_fact:
+        mount_info: '{{ mount_info|default({})|combine({item.0: item.1}) }}'
+      with_together:
+        - '{{ device_name.stdout_lines[0].split() | list | lower }}'
+        - '{{ device_name.stdout_lines[1].split() | list }}'
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - device_name.stdout is defined and device_name.stdout_lines is defined
+        - (device_name.stdout | length > 0)
+      tags:
+        - CCE-82150-4
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - medium_severity
+        - mount_option_var_tmp_noexec
+        - no_reboot_needed
+    
+    - name: If /var/tmp not mounted, craft mount_info manually
+      set_fact:
+        mount_info: '{{ mount_info|default({})|combine({item.0: item.1}) }}'
+      with_together:
+        - - target
+          - source
+          - fstype
+          - options
+        - - /var/tmp
+          - ''
+          - ''
+          - defaults
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - ("--fstab" | length == 0)
+        - (device_name.stdout | length == 0)
+      tags:
+        - CCE-82150-4
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - medium_severity
+        - mount_option_var_tmp_noexec
+        - no_reboot_needed
+    
+    - name: Make sure noexec option is part of the to /var/tmp options
+      set_fact:
+        mount_info: '{{ mount_info | combine( {''options'':''''~mount_info.options~'',noexec''
+          }) }}'
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - mount_info is defined and "noexec" not in mount_info.options
+      tags:
+        - CCE-82150-4
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - medium_severity
+        - mount_option_var_tmp_noexec
+        - no_reboot_needed
+    
+    - name: Ensure /var/tmp is mounted with noexec option
+      mount:
+        path: /var/tmp
+        src: '{{ mount_info.source }}'
+        opts: '{{ mount_info.options }}'
+        state: mounted
+        fstype: '{{ mount_info.fstype }}'
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - (device_name.stdout is defined and (device_name.stdout | length > 0)) or ("--fstab"
+          | length == 0)
+      tags:
+        - CCE-82150-4
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - medium_severity
+        - mount_option_var_tmp_noexec
+        - no_reboot_needed
+    
+    - name: Check information associated to mountpoint
+      command: findmnt --fstab '/var/tmp'
+      register: device_name
+      failed_when: device_name.rc > 1
+      changed_when: false
+      when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+      tags:
+        - CCE-82153-8
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - medium_severity
+        - mount_option_var_tmp_nosuid
+        - no_reboot_needed
+    
+    - name: Create mount_info dictionary variable
+      set_fact:
+        mount_info: '{{ mount_info|default({})|combine({item.0: item.1}) }}'
+      with_together:
+        - '{{ device_name.stdout_lines[0].split() | list | lower }}'
+        - '{{ device_name.stdout_lines[1].split() | list }}'
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - device_name.stdout is defined and device_name.stdout_lines is defined
+        - (device_name.stdout | length > 0)
+      tags:
+        - CCE-82153-8
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - medium_severity
+        - mount_option_var_tmp_nosuid
+        - no_reboot_needed
+    
+    - name: If /var/tmp not mounted, craft mount_info manually
+      set_fact:
+        mount_info: '{{ mount_info|default({})|combine({item.0: item.1}) }}'
+      with_together:
+        - - target
+          - source
+          - fstype
+          - options
+        - - /var/tmp
+          - ''
+          - ''
+          - defaults
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - ("--fstab" | length == 0)
+        - (device_name.stdout | length == 0)
+      tags:
+        - CCE-82153-8
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - medium_severity
+        - mount_option_var_tmp_nosuid
+        - no_reboot_needed
+    
+    - name: Make sure nosuid option is part of the to /var/tmp options
+      set_fact:
+        mount_info: '{{ mount_info | combine( {''options'':''''~mount_info.options~'',nosuid''
+          }) }}'
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - mount_info is defined and "nosuid" not in mount_info.options
+      tags:
+        - CCE-82153-8
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - medium_severity
+        - mount_option_var_tmp_nosuid
+        - no_reboot_needed
+    
+    - name: Ensure /var/tmp is mounted with nosuid option
+      mount:
+        path: /var/tmp
+        src: '{{ mount_info.source }}'
+        opts: '{{ mount_info.options }}'
+        state: mounted
+        fstype: '{{ mount_info.fstype }}'
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - (device_name.stdout is defined and (device_name.stdout | length > 0)) or ("--fstab"
+          | length == 0)
+      tags:
+        - CCE-82153-8
+        - configure_strategy
+        - high_disruption
+        - low_complexity
+        - medium_severity
+        - mount_option_var_tmp_nosuid
+        - no_reboot_needed
+    
+    - name: Test for existence /etc/cron.d/
+      stat:
+        path: /etc/cron.d/
+      register: file_exists
+      when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+      tags:
+        - CCE-82276-7
+        - NIST-800-53-AC-6(1)
+        - NIST-800-53-CM-6(a)
+        - configure_strategy
+        - file_permissions_cron_d
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+    
+    - name: Ensure permission 0700 on /etc/cron.d/
+      file:
+        path: /etc/cron.d/
+        mode: '0700'
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - file_exists.stat is defined and file_exists.stat.exists
+      tags:
+        - CCE-82276-7
+        - NIST-800-53-AC-6(1)
+        - NIST-800-53-CM-6(a)
+        - configure_strategy
+        - file_permissions_cron_d
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+    
+    - name: Test for existence /etc/cron.daily/
+      stat:
+        path: /etc/cron.daily/
+      register: file_exists
+      when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+      tags:
+        - CCE-82239-5
+        - NIST-800-53-AC-6(1)
+        - NIST-800-53-CM-6(a)
+        - configure_strategy
+        - file_permissions_cron_daily
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+    
+    - name: Ensure permission 0700 on /etc/cron.daily/
+      file:
+        path: /etc/cron.daily/
+        mode: '0700'
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - file_exists.stat is defined and file_exists.stat.exists
+      tags:
+        - CCE-82239-5
+        - NIST-800-53-AC-6(1)
+        - NIST-800-53-CM-6(a)
+        - configure_strategy
+        - file_permissions_cron_daily
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+    
+    - name: Test for existence /etc/cron.hourly/
+      stat:
+        path: /etc/cron.hourly/
+      register: file_exists
+      when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+      tags:
+        - CCE-82229-6
+        - NIST-800-53-AC-6(1)
+        - NIST-800-53-CM-6(a)
+        - configure_strategy
+        - file_permissions_cron_hourly
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+    
+    - name: Ensure permission 0700 on /etc/cron.hourly/
+      file:
+        path: /etc/cron.hourly/
+        mode: '0700'
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - file_exists.stat is defined and file_exists.stat.exists
+      tags:
+        - CCE-82229-6
+        - NIST-800-53-AC-6(1)
+        - NIST-800-53-CM-6(a)
+        - configure_strategy
+        - file_permissions_cron_hourly
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+    
+    - name: Test for existence /etc/cron.monthly/
+      stat:
+        path: /etc/cron.monthly/
+      register: file_exists
+      when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+      tags:
+        - CCE-82262-7
+        - NIST-800-53-AC-6(1)
+        - NIST-800-53-CM-6(a)
+        - configure_strategy
+        - file_permissions_cron_monthly
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+    
+    - name: Ensure permission 0700 on /etc/cron.monthly/
+      file:
+        path: /etc/cron.monthly/
+        mode: '0700'
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - file_exists.stat is defined and file_exists.stat.exists
+      tags:
+        - CCE-82262-7
+        - NIST-800-53-AC-6(1)
+        - NIST-800-53-CM-6(a)
+        - configure_strategy
+        - file_permissions_cron_monthly
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+    
+    - name: Test for existence /etc/cron.weekly/
+      stat:
+        path: /etc/cron.weekly/
+      register: file_exists
+      when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+      tags:
+        - CCE-82250-2
+        - NIST-800-53-AC-6(1)
+        - NIST-800-53-CM-6(a)
+        - configure_strategy
+        - file_permissions_cron_weekly
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+    
+    - name: Ensure permission 0700 on /etc/cron.weekly/
+      file:
+        path: /etc/cron.weekly/
+        mode: '0700'
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - file_exists.stat is defined and file_exists.stat.exists
+      tags:
+        - CCE-82250-2
+        - NIST-800-53-AC-6(1)
+        - NIST-800-53-CM-6(a)
+        - configure_strategy
+        - file_permissions_cron_weekly
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+    
+    - name: Test for existence /etc/crontab
+      stat:
+        path: /etc/crontab
+      register: file_exists
+      when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+      tags:
+        - CCE-82205-6
+        - NIST-800-53-AC-6(1)
+        - NIST-800-53-CM-6(a)
+        - configure_strategy
+        - file_permissions_crontab
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+    
+    - name: Ensure permission 0600 on /etc/crontab
+      file:
+        path: /etc/crontab
+        mode: '0600'
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - file_exists.stat is defined and file_exists.stat.exists
+      tags:
+        - CCE-82205-6
+        - NIST-800-53-AC-6(1)
+        - NIST-800-53-CM-6(a)
+        - configure_strategy
+        - file_permissions_crontab
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+    
+    - name: Remove /etc/cron.deny
+      file:
+        path: /etc/cron.deny
+        state: absent
+      when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+      tags:
+        - CCE-86848-9
+        - disable_strategy
+        - file_cron_deny_not_exist
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+    
+    
+    
+    - name: Gather list of packages
+      package_facts:
+        manager: auto
+      when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+      tags:
+        - CCE-80289-2
+        - NIST-800-53-CM-6(a)
+        - NIST-800-53-CM-7(a)
+        - NIST-800-53-CM-7(b)
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+        - postfix_network_listening_disabled
+        - restrict_strategy
+    
+    - name: Make changes to Postfix configuration file
+      lineinfile:
+        path: /etc/postfix/main.cf
+        create: false
+        regexp: ^inet_interfaces\s*=\s.*
+        line: inet_interfaces = {{ var_postfix_inet_interfaces }}
+        state: present
+        insertafter: ^inet_interfaces\s*=\s.*
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - '"postfix" in ansible_facts.packages'
+        - '"postfix" in ansible_facts.packages'
+      tags:
+        - CCE-80289-2
+        - NIST-800-53-CM-6(a)
+        - NIST-800-53-CM-7(a)
+        - NIST-800-53-CM-7(b)
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+        - postfix_network_listening_disabled
+        - restrict_strategy
+    
+    - name: Ensure nfs-utils is removed
+      package:
+        name: nfs-utils
+        state: absent
+      tags:
+        - CCE-82933-3
+        - disable_strategy
+        - low_complexity
+        - low_disruption
+        - low_severity
+        - no_reboot_needed
+        - package_nfs-utils_removed
+    
+    - name: Disable service rpcbind
+      block:
+    
+        - name: Gather the service facts
+          service_facts: null
+    
+        - name: Disable service rpcbind
+          systemd:
+            name: rpcbind.service
+            enabled: 'no'
+            state: stopped
+            masked: 'yes'
+          when: '"rpcbind.service" in ansible_facts.services'
+      when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+      tags:
+        - CCE-80230-6
+        - disable_strategy
+        - low_complexity
+        - low_disruption
+        - low_severity
+        - no_reboot_needed
+        - service_rpcbind_disabled
+    
+    - name: Unit Socket Exists - rpcbind.socket
+      command: systemctl list-unit-files rpcbind.socket
+      args:
+        warn: false
+      register: socket_file_exists
+      changed_when: false
+      ignore_errors: true
+      check_mode: false
+      when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+      tags:
+        - CCE-80230-6
+        - disable_strategy
+        - low_complexity
+        - low_disruption
+        - low_severity
+        - no_reboot_needed
+        - service_rpcbind_disabled
+    
+    - name: Disable socket rpcbind
+      systemd:
+        name: rpcbind.socket
+        enabled: 'no'
+        state: stopped
+        masked: 'yes'
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - '"rpcbind.socket" in socket_file_exists.stdout_lines[1]'
+      tags:
+        - CCE-80230-6
+        - disable_strategy
+        - low_complexity
+        - low_disruption
+        - low_severity
+        - no_reboot_needed
+        - service_rpcbind_disabled
+    
+    - name: Gather the package facts
+      package_facts:
+        manager: auto
+      tags:
+        - CCE-82878-0
+        - chronyd_run_as_chrony_user
+        - configure_strategy
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+    
+    - name: Detect if file /etc/sysconfig/chronyd is not empty or missing
+      find:
+        path: /etc/sysconfig/
+        patterns: chronyd
+        contains: ^([\s]*OPTIONS=["]?[^"]*)("?)
+      register: chronyd_file
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - '"chrony" in ansible_facts.packages'
+      tags:
+        - CCE-82878-0
+        - chronyd_run_as_chrony_user
+        - configure_strategy
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+    
+    - name: Remove any previous configuration of user used to run chronyd process
+      replace:
+        path: /etc/sysconfig/chronyd
+        regexp: \s*-u\s+\w+\s*
+        replace: ' '
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - '"chrony" in ansible_facts.packages'
+        - chronyd_file is defined and chronyd_file.matched > 0
+      tags:
+        - CCE-82878-0
+        - chronyd_run_as_chrony_user
+        - configure_strategy
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+    
+    - name: Correct existing line in /etc/sysconfig/chronyd to run chronyd as chrony user
+      lineinfile:
+        path: /etc/sysconfig/chronyd
+        regexp: ^([\s]*OPTIONS=["]?[^"]*)("?)
+        line: \1 -u chrony\2
+        state: present
+        backrefs: true
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - '"chrony" in ansible_facts.packages'
+        - chronyd_file is defined and chronyd_file.matched > 0
+      tags:
+        - CCE-82878-0
+        - chronyd_run_as_chrony_user
+        - configure_strategy
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+    
+    - name: Insert correct line into /etc/sysconfig/chronyd ensuring chronyd runs as chrony
+        user
+      lineinfile:
+        path: /etc/sysconfig/chronyd
+        line: OPTIONS="-u chrony"
+        state: present
+        create: true
+      when:
+        - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+        - '"chrony" in ansible_facts.packages'
+        - chronyd_file is defined and chronyd_file.matched == 0
+      tags:
+        - CCE-82878-0
+        - chronyd_run_as_chrony_user
+        - configure_strategy
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+    
+    - name: Disable SSH Root Login
+      block:
+    
+        - name: Check for duplicate values
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            create: false
+            regexp: (?i)^\s*PermitRootLogin\s+
+            state: absent
+          check_mode: true
+          changed_when: false
+          register: dupes
+    
+        - name: Deduplicate values from /etc/ssh/sshd_config
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            create: false
+            regexp: (?i)^\s*PermitRootLogin\s+
+            state: absent
+          when: dupes.found is defined and dupes.found > 1
+    
+        - name: Insert correct line to /etc/ssh/sshd_config
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            create: true
+            regexp: (?i)^\s*PermitRootLogin\s+
+            line: PermitRootLogin no
+            state: present
+            insertbefore: ^[#\s]*Match
+            validate: /usr/sbin/sshd -t -f %s
+      when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+      tags:
+        - CCE-27445-6
+        - CJIS-5.5.6
+        - DISA-STIG-RHEL-07-040370
+        - NIST-800-171-3.1.1
+        - NIST-800-171-3.1.5
+        - NIST-800-53-AC-17(a)
+        - NIST-800-53-AC-6(2)
+        - NIST-800-53-CM-6(a)
+        - NIST-800-53-CM-7(a)
+        - NIST-800-53-CM-7(b)
+        - NIST-800-53-IA-2
+        - NIST-800-53-IA-2(5)
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+        - restrict_strategy
+        - sshd_disable_root_login
+    
+    - name: Disable SSH TCP Forwarding
+      block:
+    
+        - name: Check for duplicate values
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            create: false
+            regexp: (?i)^\s*AllowTcpForwarding\s+
+            state: absent
+          check_mode: true
+          changed_when: false
+          register: dupes
+    
+        - name: Deduplicate values from /etc/ssh/sshd_config
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            create: false
+            regexp: (?i)^\s*AllowTcpForwarding\s+
+            state: absent
+          when: dupes.found is defined and dupes.found > 1
+    
+        - name: Insert correct line to /etc/ssh/sshd_config
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            create: true
+            regexp: (?i)^\s*AllowTcpForwarding\s+
+            line: AllowTcpForwarding no
+            state: present
+            insertbefore: ^[#\s]*Match
+            validate: /usr/sbin/sshd -t -f %s
+      when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+      tags:
+        - CCE-85854-8
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+        - restrict_strategy
+        - sshd_disable_tcp_forwarding
+    
+    - name: Disable X11 Forwarding
+      block:
+    
+        - name: Check for duplicate values
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            create: false
+            regexp: (?i)^\s*X11Forwarding\s+
+            state: absent
+          check_mode: true
+          changed_when: false
+          register: dupes
+    
+        - name: Deduplicate values from /etc/ssh/sshd_config
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            create: false
+            regexp: (?i)^\s*X11Forwarding\s+
+            state: absent
+          when: dupes.found is defined and dupes.found > 1
+    
+        - name: Insert correct line to /etc/ssh/sshd_config
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            create: true
+            regexp: (?i)^\s*X11Forwarding\s+
+            line: X11Forwarding no
+            state: present
+            insertbefore: ^[#\s]*Match
+            validate: /usr/sbin/sshd -t -f %s
+      when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+      tags:
+        - CCE-83359-0
+        - DISA-STIG-RHEL-07-040710
+        - NIST-800-53-CM-6(b)
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+        - restrict_strategy
+        - sshd_disable_x11_forwarding
+    
+    
+    
+    - name: Set SSH Idle Timeout Interval
+      block:
+    
+        - name: Check for duplicate values
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            create: false
+            regexp: (?i)^\s*ClientAliveInterval\s+
+            state: absent
+          check_mode: true
+          changed_when: false
+          register: dupes
+    
+        - name: Deduplicate values from /etc/ssh/sshd_config
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            create: false
+            regexp: (?i)^\s*ClientAliveInterval\s+
+            state: absent
+          when: dupes.found is defined and dupes.found > 1
+    
+        - name: Insert correct line to /etc/ssh/sshd_config
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            create: true
+            regexp: (?i)^\s*ClientAliveInterval\s+
+            line: ClientAliveInterval {{ sshd_idle_timeout_value }}
+            state: present
+            insertbefore: ^[#\s]*Match
+            validate: /usr/sbin/sshd -t -f %s
+      when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+      tags:
+        - CCE-27433-2
+        - CJIS-5.5.6
+        - DISA-STIG-RHEL-07-040320
+        - NIST-800-171-3.1.11
+        - NIST-800-53-AC-12
+        - NIST-800-53-AC-17(a)
+        - NIST-800-53-AC-17(a)
+        - NIST-800-53-AC-2(5)
+        - NIST-800-53-CM-6(a)
+        - NIST-800-53-CM-6(a)
+        - NIST-800-53-SC-10
+        - PCI-DSS-Req-8.1.8
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+        - restrict_strategy
+        - sshd_set_idle_timeout
+    
+    
+    
+    - name: Set SSH Client Alive Count Max
+      block:
+    
+        - name: Check for duplicate values
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            create: false
+            regexp: (?i)^\s*ClientAliveCountMax\s+
+            state: absent
+          check_mode: true
+          changed_when: false
+          register: dupes
+    
+        - name: Deduplicate values from /etc/ssh/sshd_config
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            create: false
+            regexp: (?i)^\s*ClientAliveCountMax\s+
+            state: absent
+          when: dupes.found is defined and dupes.found > 1
+    
+        - name: Insert correct line to /etc/ssh/sshd_config
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            create: true
+            regexp: (?i)^\s*ClientAliveCountMax\s+
+            line: ClientAliveCountMax {{ var_sshd_set_keepalive }}
+            state: present
+            insertbefore: ^[#\s]*Match
+            validate: /usr/sbin/sshd -t -f %s
+      when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+      tags:
+        - CCE-27082-7
+        - CJIS-5.5.6
+        - DISA-STIG-RHEL-07-040340
+        - NIST-800-171-3.1.11
+        - NIST-800-53-AC-12
+        - NIST-800-53-AC-17(a)
+        - NIST-800-53-AC-2(5)
+        - NIST-800-53-CM-6(a)
+        - NIST-800-53-SC-10
+        - PCI-DSS-Req-8.1.8
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+        - restrict_strategy
+        - sshd_set_keepalive
+    
+    
+    
+    - name: Ensure SSH LoginGraceTime is configured
+      block:
+    
+        - name: Check for duplicate values
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            create: false
+            regexp: (?i)^\s*LoginGraceTime\s+
+            state: absent
+          check_mode: true
+          changed_when: false
+          register: dupes
+    
+        - name: Deduplicate values from /etc/ssh/sshd_config
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            create: false
+            regexp: (?i)^\s*LoginGraceTime\s+
+            state: absent
+          when: dupes.found is defined and dupes.found > 1
+    
+        - name: Insert correct line to /etc/ssh/sshd_config
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            create: true
+            regexp: (?i)^\s*LoginGraceTime\s+
+            line: LoginGraceTime {{ var_sshd_set_login_grace_time }}
+            state: present
+            insertbefore: ^[#\s]*Match
+            validate: /usr/sbin/sshd -t -f %s
+      when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+      tags:
+        - CCE-86550-1
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+        - restrict_strategy
+        - sshd_set_login_grace_time
+    
+    
+    
+    - name: Set SSH authentication attempt limit
+      block:
+    
+        - name: Check for duplicate values
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            create: false
+            regexp: (?i)^\s*MaxAuthTries\s+
+            state: absent
+          check_mode: true
+          changed_when: false
+          register: dupes
+    
+        - name: Deduplicate values from /etc/ssh/sshd_config
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            create: false
+            regexp: (?i)^\s*MaxAuthTries\s+
+            state: absent
+          when: dupes.found is defined and dupes.found > 1
+    
+        - name: Insert correct line to /etc/ssh/sshd_config
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            create: true
+            regexp: (?i)^\s*MaxAuthTries\s+
+            line: MaxAuthTries {{ sshd_max_auth_tries_value }}
+            state: present
+            insertbefore: ^[#\s]*Match
+            validate: /usr/sbin/sshd -t -f %s
+      when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+      tags:
+        - CCE-82354-2
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+        - restrict_strategy
+        - sshd_set_max_auth_tries
+    
+    
+    
+    - name: Set SSH MaxSessions limit
+      block:
+    
+        - name: Check for duplicate values
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            create: false
+            regexp: (?i)^\s*MaxSessions\s+
+            state: absent
+          check_mode: true
+          changed_when: false
+          register: dupes
+    
+        - name: Deduplicate values from /etc/ssh/sshd_config
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            create: false
+            regexp: (?i)^\s*MaxSessions\s+
+            state: absent
+          when: dupes.found is defined and dupes.found > 1
+    
+        - name: Insert correct line to /etc/ssh/sshd_config
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            create: true
+            regexp: (?i)^\s*MaxSessions\s+
+            line: MaxSessions {{ var_sshd_max_sessions }}
+            state: present
+            insertbefore: ^[#\s]*Match
+            validate: /usr/sbin/sshd -t -f %s
+      when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+      tags:
+        - CCE-85856-3
+        - configure_strategy
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+        - sshd_set_max_sessions
+    
+    
+    
+    - name: Ensure SSH MaxStartups is configured
+      block:
+    
+        - name: Check for duplicate values
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            create: false
+            regexp: (?i)^\s*MaxStartups\s+
+            state: absent
+          check_mode: true
+          changed_when: false
+          register: dupes
+    
+        - name: Deduplicate values from /etc/ssh/sshd_config
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            create: false
+            regexp: (?i)^\s*MaxStartups\s+
+            state: absent
+          when: dupes.found is defined and dupes.found > 1
+    
+        - name: Insert correct line to /etc/ssh/sshd_config
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            create: true
+            regexp: (?i)^\s*MaxStartups\s+
+            line: MaxStartups {{ var_sshd_set_maxstartups }}
+            state: present
+            insertbefore: ^[#\s]*Match
+            validate: /usr/sbin/sshd -t -f %s
+      when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+      tags:
+        - CCE-90714-7
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+        - restrict_strategy
+        - sshd_set_maxstartups
+    
+    
+    
+    - name: Use Only FIPS 140-2 Validated Ciphers
+      block:
+    
+        - name: Check for duplicate values
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            create: false
+            regexp: (?i)^\s*Ciphers\s+
+            state: absent
+          check_mode: true
+          changed_when: false
+          register: dupes
+    
+        - name: Deduplicate values from /etc/ssh/sshd_config
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            create: false
+            regexp: (?i)^\s*Ciphers\s+
+            state: absent
+          when: dupes.found is defined and dupes.found > 1
+    
+        - name: Insert correct line to /etc/ssh/sshd_config
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            create: true
+            regexp: (?i)^\s*Ciphers\s+
+            line: Ciphers {{ sshd_approved_ciphers }}
+            state: present
+            insertbefore: ^[#\s]*Match
+            validate: /usr/sbin/sshd -t -f %s
+      when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+      tags:
+        - CCE-27295-5
+        - CJIS-5.5.6
+        - NIST-800-171-3.1.13
+        - NIST-800-171-3.13.11
+        - NIST-800-171-3.13.8
+        - NIST-800-53-AC-17(2)
+        - NIST-800-53-AC-17(a)
+        - NIST-800-53-CM-6(a)
+        - NIST-800-53-IA-5(1)(c)
+        - NIST-800-53-MA-4(6)
+        - NIST-800-53-SC-12(2)
+        - NIST-800-53-SC-12(3)
+        - NIST-800-53-SC-13
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+        - restrict_strategy
+        - sshd_use_approved_ciphers
+    
+    
+    
+    - name: Use Only FIPS 140-2 Validated MACs
+      block:
+    
+        - name: Check for duplicate values
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            create: false
+            regexp: (?i)^\s*MACs\s+
+            state: absent
+          check_mode: true
+          changed_when: false
+          register: dupes
+    
+        - name: Deduplicate values from /etc/ssh/sshd_config
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            create: false
+            regexp: (?i)^\s*MACs\s+
+            state: absent
+          when: dupes.found is defined and dupes.found > 1
+    
+        - name: Insert correct line to /etc/ssh/sshd_config
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            create: true
+            regexp: (?i)^\s*MACs\s+
+            line: MACs {{ sshd_approved_macs }}
+            state: present
+            insertbefore: ^[#\s]*Match
+            validate: /usr/sbin/sshd -t -f %s
+      when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+      tags:
+        - CCE-27455-5
+        - NIST-800-171-3.1.13
+        - NIST-800-171-3.13.11
+        - NIST-800-171-3.13.8
+        - NIST-800-53-AC-17(2)
+        - NIST-800-53-AC-17(a)
+        - NIST-800-53-CM-6(a)
+        - NIST-800-53-MA-4(6)
+        - NIST-800-53-SC-12(2)
+        - NIST-800-53-SC-12(3)
+        - NIST-800-53-SC-13
+        - low_complexity
+        - low_disruption
+        - medium_severity
+        - no_reboot_needed
+        - restrict_strategy
+        - sshd_use_approved_macs
